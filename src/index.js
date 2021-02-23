@@ -134,7 +134,7 @@ class SDK {
             if (typeof document === 'undefined') return this;
 
             setStatus('READY');
-            this.send(true, 'exit', document.URL);
+            this.send('exit', document.URL);
 
             return this;
         };
