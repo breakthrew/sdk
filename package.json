@@ -1,10 +1,9 @@
 {
   "name": "@breakthrew/sdk",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "main": "./lib/index.js",
   "description": "BreakThrew Software Develop Kit",
   "license": "MIT",
-  "private": false,
   "repository": {
     "type": "git",
     "url": "https://github.com/breakthrew/sdk.git"
@@ -53,7 +52,7 @@
     "deploy": "npm run build && node ./deploy/cdn.js",
     "test": "mocha",
     "pretest": "npm-run-all build:umd*",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run deploy"
   },
   "lint-staged": {
     "*.{js,json}": [
