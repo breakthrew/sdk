@@ -1,12 +1,30 @@
-const config = require('./.core/babel.config');
+module.exports = api => {
+    const isTest = api.env('test');
+    if (isTest) {
+        return {
+            presets: ['@babel/preset-env'],
+            plugins: [
+                [
+                    '@babel/plugin-proposal-class-properties',
+                    {
+                        loose: true,
+                    },
+                ],
+                ['@babel/plugin-proposal-export-default-from'],
+            ],
+        };
+    }
 
-// @example
-//
-// To add a module resolver for node and webpack
-//
-// const path = require('path');
-//
-// const moduleResolver = config.plugins.find(plugin => plugin[0] === 'module-resolver');
-// moduleResolver[1].alias['redux-addons'] = './src/app/redux-addons';
-
-module.exports = config;
+    return {
+        presets: ['@babel/preset-env', 'minify'],
+        plugins: [
+            [
+                '@babel/plugin-proposal-class-properties',
+                {
+                    loose: true,
+                },
+            ],
+            ['@babel/plugin-proposal-export-default-from'],
+        ],
+    };
+};
