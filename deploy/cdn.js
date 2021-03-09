@@ -1,127 +1,58 @@
 const ora = require('ora');
-const path = require('path');
 const chalk = require('chalk');
 const fs = require('fs-extra');
-const semver = require('semver');
 const pkg = require('../package');
-const op = require('object-path');
-const inquirer = require('inquirer');
-const S3 = require('aws-sdk/clients/s3');
+const config = require('../s3.config');
+const AWS = require('aws-sdk/clients/s3');
 
-const normalize = (...args) =>
-    path.normalize(path.join(process.cwd(), ...args));
+const { normalize } = require('./utils');
 
 const deploy = async () => {
-    const pkgPath = normalize('package.json');
-    const distPath = normalize('dist', 'brkthrw.min.js');
-    const defaultPath = normalize('deploy', 's3.config.json');
+    const { endpoint, key, secret } = config;
+    const distFilePath = normalize('dist', 'brkthrw.min.js');
 
-    const defaults = fs.existsSync(defaultPath)
-        ? require('./s3.config')
-        : {
-              endpoint: 'sfo3.digitaloceanspaces.com',
-          };
-
-    const defaultVer = semver.inc(pkg.version, 'patch');
-
-    console.log('');
-
-    const validate = (val, field) => (!val ? `${field} is required` : true);
-    const validateVer = val =>
-        semver.valid(val) ? true : `invalid version: ${chalk.magenta(val)}`;
-
-    const prefix = chalk.magenta('   > ');
-    const suffix = chalk.magenta(': ');
-
-    console.log(` Deploy ${chalk.magenta(pkg.name)}...`);
-    console.log('');
-
-    const { endpoint, key, secret, version } = await inquirer.prompt([
-        {
-            prefix,
-            suffix,
-            type: 'input',
-            name: 'endpoint',
-            message: chalk.cyan('S3 Endpoint'),
-            default: op.get(defaults, 'endpoint'),
-            validate: val => validate(val, 'endpoint'),
-        },
-        {
-            prefix,
-            suffix,
-            name: 'key',
-            type: 'input',
-            message: chalk.cyan('Access Key'),
-            default: op.get(defaults, 'key'),
-            validate: val => validate(val, 'key'),
-        },
-        {
-            prefix,
-            suffix,
-            name: 'secret',
-            type: 'input',
-            message: chalk.cyan('Secret Key'),
-            default: op.get(defaults, 'secret'),
-            validate: val => validate(val, 'secret'),
-        },
-        {
-            prefix,
-            suffix,
-            type: 'input',
-            name: 'version',
-            default: defaultVer,
-            message: chalk.cyan('Version'),
-            validate: val => validateVer(val),
-        },
-    ]);
-
-    console.log('');
-    const spinner = ora(` updating ${chalk.magenta('package.json')}...`);
+    // prettier-ignore
+    const spinner = ora(`deploying version ${chalk.cyan(pkg.version)} to ${chalk.magenta(endpoint)}...`);
     spinner.indent = 1;
     spinner.start();
 
-    await Promise.all([
-        fs.writeFile(
-            defaultPath,
-            JSON.stringify({ endpoint, key, secret }, null, 2),
-        ),
-        fs.writeFile(pkgPath, JSON.stringify({ ...pkg, version }, null, 2)),
-    ]);
-
     const [err] = await new Promise(resolve => {
-        spinner.text = `deploying version ${chalk.cyan(
-            version,
-        )} to ${chalk.magenta(endpoint)}...`;
+        let err;
+        let complete = 0;
 
-        const s3 = new S3({
+        const S3 = new AWS({
             endpoint,
             accessKeyId: key,
             secretAccessKey: secret,
         });
 
         const fileObj = {
-            ACL: 'public-read',
-            Body: fs.readFileSync(distPath),
             Bucket: 'brkthrw',
+            ACL: 'public-read',
             Key: 'brkthrw.min.js',
+            Body: fs.readFileSync(distFilePath),
         };
 
-        s3.putObject(fileObj, (err, data) => resolve([err, data]));
+        const done = (error, data) => {
+            complete += 1;
+            err = error || err;
+            if (complete === 2) resolve([err, data]);
+        };
+
+        // prettier-ignore
+        S3.putObject({ ...fileObj, Key: `ver/brkthrw.${pkg.version}.min.js`}, done);
+        S3.putObject(fileObj, done);
     });
 
     if (!err) {
-        spinner.succeed(
-            ` deployed ${chalk.magenta(pkg.name)}@${chalk.cyan(version)}`,
-        );
+        // prettier-ignore
+        spinner.succeed(` deployed ${chalk.magenta(pkg.name)} ${chalk.cyan(pkg.version)}`);
     } else {
-        spinner.fail(
-            ` deployment ${chalk.magenta(pkg.name)}@${chalk.cyan(
-                version,
-            )} failed!`,
-        );
+        // prettier-ignore
+        spinner.fail(` deployment ${chalk.magenta(pkg.name)} ${chalk.cyan(pkg.version)} failed!`);
 
         console.log('');
-        console.log(err.message);
+        console.log('\t', err.message);
         console.log('');
 
         process.exit();

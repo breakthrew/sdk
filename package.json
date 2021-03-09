@@ -2,7 +2,7 @@
   "name": "@breakthrew/sdk",
   "version": "0.0.2",
   "main": "./lib/index.js",
-  "description": "BreakThrew Software Develop Kit",
+  "description": "BreakThrew Software Development Kit",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -12,11 +12,16 @@
     "dist",
     "lib"
   ],
+  "lint-staged": {
+    "*.{js,json}": [
+      "prettier --write",
+      "git add"
+    ]
+  },
   "dependencies": {
     "js-cookie": "^2.2.1"
   },
   "devDependencies": {
-    "@aws-sdk/client-s3": "^3.6.1",
     "@babel/cli": "^7.10.5",
     "@babel/core": "^7.11.0",
     "@babel/plugin-proposal-class-properties": "^7.10.4",
@@ -27,6 +32,7 @@
     "babel-jest": "^26.2.2",
     "babel-preset-minify": "^0.5.1",
     "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
     "chalk": "^4.1.0",
     "cross-env": "^7.0.2",
     "eslint": "^5.16.0",
@@ -48,16 +54,14 @@
     "build:dist": "rollup src/index.js --file build/dist/brkthrw.min.js --format iife --name breakthrew --globals js-cookie:cookie",
     "build:umd": "rollup src/index.js --file build/lib/index.js --format umd --name breakthrew --globals js-cookie:Cookie",
     "build:dist-babel": "babel build/dist --out-dir dist",
-    "build:umd-babel": "babel build/lib --out-dir lib",
-    "deploy": "npm run build && node ./deploy/cdn.js",
-    "test": "mocha",
+    "build:umd-babel": "babel build/lib --out-dir lib --source-maps inline",
+    "deploy": "npm-run-all deploy:*",
+    "deploy:version": "node ./deploy/ver.js",
+    "deploy:build": "npm run build",
+    "deploy:upload": "node ./deploy/cdn.js",
     "pretest": "npm-run-all build:umd*",
-    "prepublishOnly": "npm run deploy"
-  },
-  "lint-staged": {
-    "*.{js,json}": [
-      "prettier --write",
-      "git add"
-    ]
+    "prepublishOnly": "npm run deploy",
+    "test": "mocha",
+    "prompt:test": "cross-env NODE_ENV=test node ./deploy/ver.js"
   }
 }

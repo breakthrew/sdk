@@ -1,7 +1,7 @@
 .DS_Store
 build
-deploy/s3.config.json
 dist
 lib
 node_modules
 build
+s3.config.json

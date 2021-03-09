@@ -1,16 +1,22 @@
+const chai = require('chai');
 const sdk = require('../lib');
 const _ = require('underscore');
 const op = require('object-path');
-const expect = require('chai').expect;
+const pkg = require('../package');
+const chaiAsPromised = require('chai-as-promised');
+
+chai.use(chaiAsPromised);
+
+const { expect, should } = chai;
 
 describe('BreakThrew', () => {
-    it('brkthrw.init()', () => {
-        sdk.init('init');
-        expect(sdk.app).to.equal('init');
-    });
+    sdk.init('init');
+    _.times(10, i => sdk.push('test', i));
 
-    it('brkthrw.push()', () => {
-        _.times(10, i => sdk.push('test', i));
-        expect(sdk.q).to.have.lengthOf(10);
-    });
+    it('brkthrw.init()', () => expect(sdk.app).to.equal('init'));
+
+    it('brkthrw.push()', () => expect(sdk.q).to.have.lengthOf(10));
+
+    // prettier-ignore
+    it(`${pkg.name}@${pkg.version}`, () => expect(sdk.version).to.equal(pkg.version));
 });

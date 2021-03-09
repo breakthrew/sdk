@@ -1,0 +1,16 @@
+
+body {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+    align-items: center;
+    justify-content: center;
+}
+
+button {
+    border: none;
+    color: #FFFFFF;
+    padding: 10px 20px;
+    background-color: #4F82BA;
+}
