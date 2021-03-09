@@ -99,7 +99,7 @@ module.exports = (function() {
         }
 
         get init() {
-            return a => {                
+            return a => {
                 A = a;
                 return this;
             };
