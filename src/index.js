@@ -142,16 +142,19 @@ let breakthrew;
         get send() {
             return async (...args) => {
                 this.push(...args);
-                if (this.q.length < 1 || !isStatus('READY')) return this;
+
+                const current = Array.from(this.q);
+
+                if (current.length < 1 || !isStatus('READY')) return this;
 
                 Q = [];
 
                 setStatus('BUSY');
                 await API('track', {
                     app: this.app,
-                    events: this.q,
                     token: this.token,
                     timestamp: Date.now(),
+                    events: JSON.stringify(current),
                 });
                 setStatus('READY');
 
