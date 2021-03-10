@@ -60,7 +60,7 @@ let breakthrew;
         }
 
         const PORT = DOMAIN === 'localhost' ? `:${9000}` : '';
-        const PROTO = DOMAIN === 'localhost' ? '' : '//';
+        const PROTO = DOMAIN === 'localhost' ? 'http://' : '//';
 
         // prettier-ignore
         const URL = `${PROTO}${DOMAIN}${PORT}${String(endpoint).substr(1) !== '/' ? `/${endpoint}` : endpoint}`;
