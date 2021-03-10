@@ -10,6 +10,7 @@
         "ecmaVersion": 2018,
         "sourceType": "module"
     },
+    "plugins": ["html"],
     "rules": {
         "indent": "off",
         "linebreak-style": ["warn", "unix"],

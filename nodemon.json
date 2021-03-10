@@ -1,0 +1,9 @@
+{
+    "quiet": true,
+    "env": {
+        "NODE_ENV": "development"
+    },
+    "ignore": ["./build", "./deploy", "./dist", "./lib", "./static", "./test"],
+    "watch": ["./src"],
+    "ext": "js,json"
+}

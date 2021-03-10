@@ -1,0 +1,28 @@
+body {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+    align-items: center;
+    justify-content: center;
+}
+
+button {
+    border: 2px solid #3669a1;
+    border-radius: 200px;
+    color: #ffffff;
+    padding: 10px 30px;
+    background-color: #4f82ba;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+button:focus {
+    outline: none;
+    opacity: 0.8;
+    box-shadow: 0 0 0 2px rgba(79, 130, 186, 0.25);
+}

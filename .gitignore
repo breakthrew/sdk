@@ -5,3 +5,4 @@ lib
 node_modules
 build
 s3.config.json
+static/*.js

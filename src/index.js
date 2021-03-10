@@ -1,12 +1,14 @@
-module.exports = (function() {
+import Cookie from 'js-cookie';
+import { version } from '../package.json';
+
+let breakthrew;
+
+(function() {
     let A;
     let Q = [];
-    let breakthrew;
+
     let STATUS = 'READY';
     let DOMAIN = 'api.brkthrw.io';
-
-    const Cookie = require('js-cookie');
-    const { version } = require('../package');
 
     const isStatus = check => {
         check = Array.isArray(check) ? check : [check];
@@ -58,9 +60,10 @@ module.exports = (function() {
         }
 
         const PORT = DOMAIN === 'localhost' ? `:${9000}` : '';
+        const PROTO = DOMAIN === 'localhost' ? '' : '//';
 
         // prettier-ignore
-        const URL = `//${DOMAIN}${PORT}${String(endpoint).substr(1) !== '/' ? `/${endpoint}` : endpoint}`;
+        const URL = `${PROTO}${DOMAIN}${PORT}${String(endpoint).substr(1) !== '/' ? `/${endpoint}` : endpoint}`;
 
         // prettier-ignore
         const DATA = body ? Object.entries(body).map(([key, val]) => `${key}=${encodeURIComponent(val)}`).join('&') : {};
@@ -84,7 +87,7 @@ module.exports = (function() {
         });
     };
 
-    class SDK {
+    class BREAKTHREW {
         constructor(a, q) {
             A = a;
             Q = q || [];
@@ -93,8 +96,11 @@ module.exports = (function() {
             if (brkthrw !== null) setDomain(brkthrw);
 
             if (typeof window !== 'undefined') {
-                window.addEventListener('load', e => this.load(e));
-                window.addEventListener('beforeunload', e => this.unload(e));
+                window.removeEventListener('load', this.load);
+                window.removeEventListener('beforeunload', this.unload);
+
+                window.addEventListener('load', this.load);
+                window.addEventListener('beforeunload', this.unload);
             }
         }
 
@@ -114,7 +120,8 @@ module.exports = (function() {
                     };
 
                     if (typeof window !== 'undefined') {
-                        info.referrer = document.referrer;
+                        info.referrer =
+                            document.referrer || window.location.href;
                     }
 
                     args.push(info);
@@ -196,7 +203,7 @@ module.exports = (function() {
             ? window.brkthrw
             : { app: 'breakthrew', q: [] };
 
-    breakthrew = new SDK(app, q);
+    breakthrew = new BREAKTHREW(app, q);
 
     if (typeof window !== 'undefined') {
         window.brkthrw = breakthrew;
@@ -204,3 +211,5 @@ module.exports = (function() {
 
     return breakthrew;
 })();
+
+export default breakthrew;

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>BreakThrew SDK</title>
+        <link rel="stylesheet" href="style.css" />
+        <meta name="description" content="BreakThrew SDK test page" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+    </head>
+
+    <body>
+        <button type="button" id="track-btn">
+            Track
+        </button>
+        <script>
+            // prettier-ignore
+            !(function(t, e, r) { window.brkthrw = window.brkthrw || (function() { return ( (this.q = []), (this.app = e), (this.push = this.q.push), this ); })(); var i = document.createElement('script'); (i.async = 1), (i.src = t), (r = r || document.getElementsByTagName( 'script', )[0]).parentNode.insertBefore(i, r); })
+            ('brkthrw.js', 'kEtuxSJmomGTOLnj');
+        </script>
+
+        <script type="text/javascript">
+            (function init() {
+                var btn = document.getElementById('track-btn');
+
+                if (btn) {
+                    var events = ['click'];
+                    function track(e) {
+                        window.brkthrw.push(e.type, e.target.id);
+                    }
+
+                    for (var i = 0; i < events.length; i++) {
+                        var evt = events[i];
+                        btn.addEventListener(evt, track);
+                    }
+                }
+            })();
+        </script>
+    </body>
+</html>
