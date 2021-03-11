@@ -5,6 +5,7 @@ let breakthrew;
 
 (function() {
     let A;
+    let I;
     let Q = [];
 
     let STATUS = 'READY';
@@ -96,6 +97,7 @@ let breakthrew;
             if (brkthrw !== null) setDomain(brkthrw);
 
             if (typeof window !== 'undefined') {
+                I = setInterval(this.send, 3000);
                 window.removeEventListener('load', this.load);
                 window.removeEventListener('beforeunload', this.unload);
 
@@ -120,8 +122,8 @@ let breakthrew;
                     };
 
                     if (typeof window !== 'undefined') {
-                        info.referrer =
-                            document.referrer || window.location.href;
+                        // prettier-ignore
+                        info.referrer = document.referrer || window.location.href;
                     }
 
                     args.push(info);
@@ -132,7 +134,7 @@ let breakthrew;
         }
 
         get q() {
-            return Q;
+            return Array.from(Q);
         }
 
         get app() {
@@ -143,23 +145,29 @@ let breakthrew;
             return async (...args) => {
                 this.push(...args);
 
-                const current = Array.from(this.q);
+                if (this.q.length < 1 || !isStatus('READY')) return this;
 
-                if (current.length < 1 || !isStatus('READY')) return this;
+                const events = JSON.stringify(this.q);
 
                 Q = [];
 
                 setStatus('BUSY');
                 await API('track', {
+                    events,
                     app: this.app,
                     token: this.token,
-                    timestamp: Date.now(),
-                    events: JSON.stringify(current),
+                    session: this.session,
                 });
                 setStatus('READY');
 
                 return this;
             };
+        }
+
+        get session() {
+            const s = Cookie.get('brkthrw-session') || Date.now();
+            Cookie.set('brkthrw-session', s);
+            return s;
         }
 
         get token() {
@@ -187,6 +195,8 @@ let breakthrew;
 
         get unload() {
             return () => {
+                clearInterval(I);
+                
                 if (typeof document === 'undefined') return this;
 
                 setStatus('READY');
