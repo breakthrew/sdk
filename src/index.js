@@ -11,6 +11,8 @@ let breakthrew;
     let STATUS = 'READY';
     let DOMAIN = 'api.brkthrw.io';
 
+    const isIE = () => window.navigator.userAgent.indexOf('MSIE ') > -1;
+
     const isStatus = check => {
         check = Array.isArray(check) ? check : [check];
         return check.includes(STATUS);
@@ -52,7 +54,7 @@ let breakthrew;
         return params;
     };
 
-    const API = (endpoint, body) => {
+    const API = (endpoint, body, method) => {
         if (!A) {
             return Promise.reject({
                 message: 'BreakThrew AppID is undefined',
@@ -60,8 +62,9 @@ let breakthrew;
             });
         }
 
+        method = method || 'POST';
+        const PROTO = 'https://';
         const PORT = DOMAIN === 'localhost' ? `:${9000}` : '';
-        const PROTO = DOMAIN === 'localhost' ? 'http://' : '//';
 
         // prettier-ignore
         const URL = `${PROTO}${DOMAIN}${PORT}${String(endpoint).substr(1) !== '/' ? `/${endpoint}` : endpoint}`;
@@ -69,23 +72,43 @@ let breakthrew;
         // prettier-ignore
         const DATA = body ? Object.entries(body).map(([key, val]) => `${key}=${encodeURIComponent(val)}`).join('&') : {};
 
-        const HEADERS = ['Content-Type', 'application/x-www-form-urlencoded'];
+        const HEADERS = [['Content-Type', 'application/x-www-form-urlencoded']];
 
-        return new Promise((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', URL, true);
-            xhr.setRequestHeader(...HEADERS);
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 200) {
-                        resolve(JSON.parse(xhr.responseText));
-                    } else {
-                        reject({ message: xhr.statusText, code: xhr.status });
+        if (isIE()) {
+            return new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open(method, URL, true);
+                HEADERS.forEach(header => xhr.setRequestHeader(...header));
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200) {
+                            resolve(JSON.parse(xhr.responseText));
+                        } else {
+                            reject({
+                                message: xhr.statusText,
+                                code: xhr.status,
+                            });
+                        }
                     }
-                }
+                };
+                xhr.send(DATA);
+            });
+        } else {
+            const headers = new Headers();
+            HEADERS.forEach(header => headers.append(...header));
+
+            const req = new Request(URL);
+            const opt = {
+                method,
+                headers,
+                body: DATA,
+                mode: 'cors',
+                keepalive: true,
+                cache: 'default',
             };
-            xhr.send(DATA);
-        });
+
+            return fetch(req, opt);
+        }
     };
 
     class BREAKTHREW {
@@ -97,12 +120,11 @@ let breakthrew;
             if (brkthrw !== null) setDomain(brkthrw);
 
             if (typeof window !== 'undefined') {
-                I = setInterval(this.send, 3000);
-                window.removeEventListener('load', this.load);
-                window.removeEventListener('beforeunload', this.unload);
-
                 window.addEventListener('load', this.load);
-                window.addEventListener('beforeunload', this.unload);
+                window.addEventListener('unload', this.unload);
+                if (isIE()) {
+                    I = setInterval(this.send, 250);
+                }
             }
         }
 
@@ -171,11 +193,11 @@ let breakthrew;
         }
 
         get token() {
-            return Cookie.get('brkthrw', { domain: DOMAIN });
+            return Cookie.get('brkthrw');
         }
 
         set token(value) {
-            Cookie.set('brkthrw', value, { domain: DOMAIN });
+            Cookie.set('brkthrw', value);
         }
 
         get load() {
@@ -194,14 +216,13 @@ let breakthrew;
         }
 
         get unload() {
-            return () => {
-                clearInterval(I);
-                
+            return async () => {
+                if (isIE()) clearInterval(I);
+
                 if (typeof document === 'undefined') return this;
 
                 setStatus('READY');
-                this.send('exit', document.URL);
-
+                await this.send('exit', document.URL);
                 return this;
             };
         }

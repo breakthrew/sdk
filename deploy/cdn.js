@@ -3,9 +3,8 @@ const chalk = require('chalk');
 const fs = require('fs-extra');
 const pkg = require('../package');
 const config = require('../s3.config');
-const AWS = require('aws-sdk/clients/s3');
-
 const { normalize } = require('./utils');
+const AWS = require('aws-sdk/clients/s3');
 
 const deploy = async () => {
     const { endpoint, key, secret } = config;

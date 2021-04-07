@@ -1,13 +1,12 @@
 const chai = require('chai');
 const sdk = require('../lib');
 const _ = require('underscore');
-const op = require('object-path');
 const pkg = require('../package');
 const chaiAsPromised = require('chai-as-promised');
 
 chai.use(chaiAsPromised);
 
-const { expect, should } = chai;
+const { expect } = chai;
 
 describe('BreakThrew', () => {
     sdk.init('init');
