@@ -11,6 +11,6 @@ module.exports = {
     ],
     output: {
         name: 'breakthrew',
-        globals: { 'js-cookie': 'Cookie' },
+        globals: { 'js-cookie': 'Cookie', 'moment': 'moment' },
     },
 };

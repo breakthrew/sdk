@@ -1,3 +1,4 @@
+import moment from 'moment';
 import Cookie from 'js-cookie';
 import { version } from '../package.json';
 
@@ -63,7 +64,7 @@ let breakthrew;
         }
 
         method = method || 'POST';
-        const PROTO = 'https://';
+        const PROTO = DOMAIN === 'localhost' ? 'http://' : 'https://';
         const PORT = DOMAIN === 'localhost' ? `:${9000}` : '';
 
         // prettier-ignore
@@ -146,6 +147,7 @@ let breakthrew;
                     if (typeof window !== 'undefined') {
                         // prettier-ignore
                         info.referrer = document.referrer || window.location.href;
+                        info.url = window.location.href;
                     }
 
                     args.push(info);
@@ -187,9 +189,12 @@ let breakthrew;
         }
 
         get session() {
-            const s = Cookie.get('brkthrw-session') || Date.now();
+            let s = Number(Cookie.get('brkthrw-session') || Date.now());
+            const diff = Math.abs(moment().diff(moment(s), 'days'));
+
+            s = diff >= 1 ? Date.now() : s;
             Cookie.set('brkthrw-session', s);
-            return s;
+            return Number(s);
         }
 
         get token() {
