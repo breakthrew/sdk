@@ -1,6 +1,6 @@
 {
   "name": "@breakthrew/sdk",
-  "version": "0.0.7",
+  "version": "0.0.10",
   "main": "./lib/index.js",
   "description": "BreakThrew Software Development Kit",
   "license": "MIT",

@@ -108,7 +108,7 @@ let breakthrew;
                 cache: 'default',
             };
 
-            return fetch(req, opt);
+            return fetch(req, opt).then(resp => resp.json());
         }
     };
 
@@ -198,7 +198,8 @@ let breakthrew;
         }
 
         get token() {
-            return Cookie.get('brkthrw');
+            const t = Cookie.get('brkthrw');
+            return t === 'undefined' ? undefined : t;
         }
 
         set token(value) {
@@ -211,6 +212,7 @@ let breakthrew;
 
                 if (!this.token) {
                     const { token } = await API('token');
+
                     this.token = token;
                 }
 

@@ -9,7 +9,7 @@
         <script type="text/javascript">
             //prettier-ignore
             (function(u, i, p) { window.brkthrw = window.brkthrw || (function() { var obj = { q: [], app: i }; obj.push = function() { var args = Array.from(arguments); args.push({ referrer: document.referrer || window.location.href, timestamp: Date.now(), }); obj.q.push(args); }; var s = document.createElement('script'); s.async = 1; s.src = u; p = p || document.getElementsByTagName('script')[0]; p.parentNode.insertBefore(s, p); return obj; })(); })
-            ('brkthrw.js', 'kEtuxSJmomGTOLnjx');
+            ('brkthrw.js', 'qx3CZ0T6vm2eEkJ5');
         </script>
     </head>
 
@@ -17,20 +17,33 @@
         <button type="button" id="track-btn">
             Track
         </button>
+        <button type="button" id="send-btn">
+            Send
+        </button>
 
         <script type="text/javascript">
             (function init(window) {
-                var btn = document.getElementById('track-btn');
+                var sendBtn = document.getElementById('send-btn');
+                var trackBtn = document.getElementById('track-btn');
 
-                if (btn) {
+                function send(e) {
+                    window.brkthrw.send();
+                }
+
+                function track(e) {
+                    window.brkthrw.push(e.type, e.target.id);
+                }
+
+                if (sendBtn) {
+                    sendBtn.addEventListener('click', send);
+                }
+
+                if (trackBtn) {
                     var events = ['click'];
-                    function track(e) {
-                        window.brkthrw.push(e.type, e.target.id);
-                    }
 
                     for (var i = 0; i < events.length; i++) {
                         var evt = events[i];
-                        btn.addEventListener(evt, track);
+                        trackBtn.addEventListener(evt, track);
                     }
                 }
             })(window);
